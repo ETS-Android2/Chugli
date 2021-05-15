@@ -1,0 +1,87 @@
+plugins {
+    id 'com.android.application'
+}
+
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    defaultConfig {
+        applicationId "com.example.gupshup"
+        minSdkVersion 18
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation 'com.github.mukeshsolanki:android-otpview-pinview:2.1.2'//for otp view
+
+    implementation platform('com.google.firebase:firebase-bom:27.1.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.hbb20:ccp:2.5.1'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+    implementation "com.github.pgreze:android-reactions:1.5.1"
+    implementation 'com.devlomi:circularstatusview:1.0.1'
+    implementation 'com.github.OMARIHAMZA:StoryView:1.0.2-alpha'
+    implementation 'com.github.sharish:ShimmerRecyclerView:v1.3@aar'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.google.firebase:firebase-messaging'
+
+    //For getting sha, type in cmd
+    //keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+
+
+    //for disabling the recaptcha verification,
+    //In order to remove the captcha verification, you have to do this in Google cloud console.
+    //
+    //IMPORTANT (you may have done that, but for the reminder):
+    //
+    //Add the SHA1 and SHA256 of your project (see how to get) in the firebase project setting page (See how to set).
+    //
+    //Go to the Library page in the Google APIs Console.
+    //
+    //In the search bar type "Android Device Verification", and select the Android Device Verification box (API). The Android Device Verification API dashboard screen appears.
+    //
+    //If the API isn't already enabled, click Enable. Hope here your problem solves and if not then proceed further.
+    //
+    //If the Create credentials button appears, click on it to generate an API key. Otherwise, click the All API credentials drop-down list, then select the API key that's associated with your project that has enabled the Android Device Verification API.
+    //
+    //In the sidebar on the left, click Credentials. Copy the API key that appears.
+    //
+    //Use this API key when you call the attest() method of the SafetyNetClient class.
+}
