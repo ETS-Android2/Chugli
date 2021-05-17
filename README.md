@@ -1,4 +1,4 @@
-# Bites
+# GupShup
 
 
 ## About App
