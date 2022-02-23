@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
@@ -60,8 +61,6 @@ public class OTPActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
-
-
         String phoneNumber = getIntent().getStringExtra("phoneNumber");   //this phone number does contain country code - +91 1234567891
 
         binding.phoneLbl.setText(new StringBuilder().append("Verify ").append(phoneNumber.substring(0, 3)).append(" ").append(phoneNumber.substring(3)).toString()); //+91 1234567891
@@ -84,6 +83,7 @@ public class OTPActivity extends AppCompatActivity {
                     @Override
                     public void onCodeSent(@NonNull String verifyId, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {  //Optional callback. It will trigger when an SMS has been sent to the users phone, and will include a verificationId and PhoneAuthProvider.ForceResendingToken.
                         super.onCodeSent(verifyId, forceResendingToken);
+                        Log.i("code sent", "onCodeSent: crossed");
                         dialog.dismiss();  //dismiss the progress dialog
                         verificationId = verifyId;
 

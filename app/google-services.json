@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "94265917419",
+    "firebase_url": "https://gupshup-e1aa3-default-rtdb.firebaseio.com",
     "project_id": "gupshup-e1aa3",
     "storage_bucket": "gupshup-e1aa3.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "94265917419-rncnfhr6q1rcgtrf0prupi39540b95c1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gupshup",
+            "certificate_hash": "a8c5177bc7083c0c055c122afee4a987cddcfc65"
+          }
+        },
         {
           "client_id": "94265917419-q7sddeei6v8u5u0bugu4trop3dfm3q9r.apps.googleusercontent.com",
           "client_type": 3

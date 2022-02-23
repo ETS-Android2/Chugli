@@ -4,6 +4,9 @@
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/066ec9cad85a0334112fb0840684780d/jetified-ShimmerRecyclerView-v1.3/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/066ec9cad85a0334112fb0840684780d/jetified-ShimmerRecyclerView-v1.3/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/066ec9cad85a0334112fb0840684780d/jetified-ShimmerRecyclerView-v1.3/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/91ea3356e7888d12660d8c248f03987b/jetified-ShimmerRecyclerView-v1.3/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/91ea3356e7888d12660d8c248f03987b/jetified-ShimmerRecyclerView-v1.3/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/91ea3356e7888d12660d8c248f03987b/jetified-ShimmerRecyclerView-v1.3/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
