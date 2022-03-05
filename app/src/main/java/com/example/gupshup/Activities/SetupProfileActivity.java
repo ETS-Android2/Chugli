@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,8 +40,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import android.util.Base64;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 
 public class SetupProfileActivity extends AppCompatActivity {
 
@@ -80,6 +79,7 @@ public class SetupProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.hasChild(userId)) {
+                    Log.i("hasChild", "true");
                     isUserNew=0;
 
                     userGlobal = snapshot.child(userId).getValue(User.class);
@@ -95,6 +95,8 @@ public class SetupProfileActivity extends AppCompatActivity {
                 }
                 else{
                     isUserNew=1;
+                    isKeyNeeded=1;
+                    Log.i("hasChild", "false");
                 }
             }
 
@@ -183,7 +185,9 @@ public class SetupProfileActivity extends AppCompatActivity {
                                         Log.i("Public Key 2", strPublicKey);
                                         Log.i("keyGenerated 2", keyGenerated + "");
 
-                                        User userLocal1 = new User(uid, name, phone, imageUrl, strPrivateKey, strPublicKey, keyGenerated);  //creating object of User
+                                        String emptyPrivateKey = "";
+
+                                        User userLocal1 = new User(uid, name, phone, imageUrl, emptyPrivateKey, strPublicKey, keyGenerated);  //creating object of User
 
                                         uploadUserDetails(userLocal1);
                                     }
@@ -198,7 +202,9 @@ public class SetupProfileActivity extends AppCompatActivity {
                     Log.i("Public Key 3", strPublicKey);
                     Log.i("keyGenerated 3", keyGenerated + "");
 
-                    User userLocal2 = new User(userId, name, phone, "No Image", strPrivateKey, strPublicKey, keyGenerated);
+                    String emptyPrivateKey = "";
+
+                    User userLocal2 = new User(userId, name, phone, "No Image", emptyPrivateKey, strPublicKey, keyGenerated);
                     uploadUserDetails(userLocal2);
 
 
@@ -207,6 +213,8 @@ public class SetupProfileActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     public void uploadUserDetails(User user){
 
@@ -218,9 +226,18 @@ public class SetupProfileActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         dialog.dismiss();
-                        Intent intent = new Intent(SetupProfileActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                        if(isUserNew==0) {
+                            Intent intent = new Intent(SetupProfileActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                        else{
+                            Intent intent = new Intent(SetupProfileActivity.this, PrivateKeyEncryptionActivity.class);
+                            intent.putExtra("strPrivateKey", strPrivateKey);
+                            intent.putExtra("user", user);
+                            startActivity(intent);
+                            finish();
+                        }
                     }
                 });
 

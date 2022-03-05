@@ -26,12 +26,14 @@
       <change beforePath="$PROJECT_DIR$/.gradle/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/checksums/checksums.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/checksums/md5-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/checksums/md5-checksums.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/checksums/sha1-checksums.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_code_findbugs_jsr305_2_0_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/app/GupShup.app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/app/GupShup.app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/gupshup/Activities/ChatActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/gupshup/Activities/ChatActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/gupshup/Activities/OTPActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/gupshup/Activities/OTPActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/gupshup/Activities/SetupProfileActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/gupshup/Activities/SetupProfileActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/gupshup/Models/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/gupshup/Models/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,25 +101,29 @@
     <property name="cidr.known.project.marker" value="true" />
     <property name="com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable" value="ALL" />
     <property name="last_directory_selection" value="$PROJECT_DIR$/app/src/main/res/drawable-v24" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/app/src/main/res/drawable-v24" />
     <property name="settings.editor.selected.configurable" value="terminal" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Users\Guru_Ji\Documents\CODE\Android_Studio_Projects\GupShup\app\src\main\res\drawable-v24" />
+      <recent name="D:\Android_Studio_Projects\GupShup\app\src\main\res\drawable-v24" />
       <recent name="D:\Users\Guru_Ji\Documents\CODE\Android_Studio_Projects\GupShup\app\src\main\res\drawable" />
+      <recent name="D:\Users\Guru_Ji\Documents\CODE\Android_Studio_Projects\GupShup\app\src\main\res\drawable-v24" />
       <recent name="D:\Users\Guru_Ji\Documents\CODE\Android_Studio_Projects\GupShup\app" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Android_Studio_Projects\GupShup\app\src\main\res\drawable" />
+      <recent name="D:\Android_Studio_Projects\GupShup\app\src\main\res\drawable-v24" />
       <recent name="D:\Android_Studio_Projects\GupShup\app" />
       <recent name="D:\Android_Studio_Projects\GupShup\app\src" />
       <recent name="D:\Users\Guru_Ji\Documents\CODE\Android_Studio_Projects\GupShup\app\src\main\res\drawable" />
-      <recent name="D:\Users\Guru_Ji\Documents\CODE\Android_Studio_Projects\GupShup\app\src\main\res\layout" />
-      <recent name="D:\Users\Guru_Ji\Documents\CODE\Android_Studio_Projects\GupShup\app\src\main\res\drawable-v24" />
     </key>
     <key name="android.template.-1313054622">
       <recent name="com.example.gupshup.Activities" />
       <recent name="com.example.gupshup" />
+    </key>
+    <key name="android.template.-55144821">
+      <recent name="com.example.gupshup.Activities" />
     </key>
     <key name="android.template.174516389">
       <recent name="com.example.gupshup.Activities" />

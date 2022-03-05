@@ -61,6 +61,8 @@ dependencies {
     implementation 'com.github.sharish:ShimmerRecyclerView:v1.3@aar'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.scottyab:aescrypt:0.0.1'
+
 
     //For getting sha, type in cmd
     //keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android

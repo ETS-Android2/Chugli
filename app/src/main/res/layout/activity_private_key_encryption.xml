@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.PrivateKeyEncryptionActivity">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/key_image" />
+
+    <TextView
+        android:id="@+id/phoneLbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Enter Key For Ultimate Privacy"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/imageView"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Key must have:\n-> at least one number\n-> at least one lowercase character\n-> at least one uppercase character\n-> length between 8 and 20"
+        android:textAlignment="viewStart"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/phoneLbl"
+        app:layout_constraintStart_toStartOf="@+id/phoneLbl"
+        app:layout_constraintTop_toBottomOf="@+id/phoneLbl" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/tvKey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/textbox_outline"
+                android:ems="10"
+                android:lines="1"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:hint="Enter Key..."
+                android:padding="10dp"
+                />
+
+            <Button
+                android:id="@+id/continueBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/button_gradient_background"
+                android:textColor="@color/white"
+                android:text="Setup Profile" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:gravity="center"
+        android:text="⚠️ NOTE ⚠️\n\nKeep this Key Safe with you.\nOnce Lost, Chats can't be recovered again."
+        android:textAlignment="center"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/cardView"
+        app:layout_constraintStart_toStartOf="@+id/cardView"
+        app:layout_constraintTop_toBottomOf="@+id/cardView"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
