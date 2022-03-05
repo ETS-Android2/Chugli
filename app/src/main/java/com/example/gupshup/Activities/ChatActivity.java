@@ -32,6 +32,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -52,6 +57,9 @@ public class ChatActivity extends AppCompatActivity {
     ProgressDialog dialog;
     String senderUid;
     String receiverUid;
+
+    PrivateKey privateKey;
+    PublicKey publicKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,6 +163,8 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String messageTxt = binding.messageBox.getText().toString();
 
+                encryptRSA(messageTxt);
+
                 Date date = new Date();
                 Message message = new Message(messageTxt, senderUid, date.getTime());
                 binding.messageBox.setText("");
@@ -239,6 +249,18 @@ public class ChatActivity extends AppCompatActivity {
 //        getSupportActionBar().setTitle(name);//default actionbar of android
 //
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);//default actionbar of android
+    }
+
+    public void encryptRSA(String msg){
+        try {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+            generator.initialize(1024);
+            KeyPair pair = generator.generateKeyPair();
+            privateKey=pair.getPrivate();
+            publicKey= pair.getPublic();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

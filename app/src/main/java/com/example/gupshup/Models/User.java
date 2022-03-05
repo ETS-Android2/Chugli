@@ -2,17 +2,21 @@ package com.example.gupshup.Models;
 
 public class User {
 
-    private String uid, name, phoneNumber, profileImage;
+    private String uid, name, phoneNumber, profileImage, strPrivateKey, strPublicKey;
+    private int keyGenerated;
 
     public User() {  //Remember we need empty constructor always when we deal with firebase
 
     }
 
-    public User(String uid, String name, String phoneNumber, String profileImage) {
+    public User(String uid, String name, String phoneNumber, String profileImage, String privateKey, String publicKey, int keyGenerated) {
         this.uid = uid;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.profileImage = profileImage;
+        this.strPrivateKey = privateKey;
+        this.strPublicKey = publicKey;
+        this.keyGenerated = keyGenerated;
     }
 
     public String getUid() {
@@ -46,4 +50,29 @@ public class User {
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
+
+    public String getPrivateKey() {
+        return strPrivateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.strPrivateKey = privateKey;
+    }
+
+    public String getPublicKey() {
+        return strPublicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.strPublicKey = publicKey;
+    }
+
+    public int getKeyGenerated() {
+        return keyGenerated;
+    }
+
+    public void setKeyGenerated(int keyGenerated) {
+        this.keyGenerated = keyGenerated;
+    }
 }
+

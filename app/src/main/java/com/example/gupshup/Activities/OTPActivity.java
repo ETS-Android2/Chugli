@@ -77,7 +77,7 @@ public class OTPActivity extends AppCompatActivity {
 
                     @Override
                     public void onVerificationFailed(@NonNull FirebaseException e) {
-
+                        Log.e("verification failed", "onVerificationFailed: "+e);
                     }
 
                     @Override
