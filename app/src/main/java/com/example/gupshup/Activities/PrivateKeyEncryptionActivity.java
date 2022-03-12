@@ -8,6 +8,7 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -109,6 +110,7 @@ public class PrivateKeyEncryptionActivity extends AppCompatActivity {
 
     public void encrypt() throws GeneralSecurityException {
         String strEncryptedPrivateKey = AESCrypt.encrypt(strAESKey, strPrivateKey);
+//        decrypt();
         saveToSharedPreferences();
         uploadKeyToFirebase(strEncryptedPrivateKey);
     }
@@ -149,7 +151,7 @@ public class PrivateKeyEncryptionActivity extends AppCompatActivity {
     }
 
 //    public void decrypt() throws GeneralSecurityException {
-//        String strDecryptedPrivateKey = AESCrypt.decrypt(strAESKey, strPrivateKey);
-//        Toast.makeText(this, "Your Message Was Copied to clip board", Toast.LENGTH_SHORT).show();
+//        String strDecryptedPrivateKey = AESCrypt.decrypt(strAESKey, temp);
+//        Log.i("decrypt private: ", strDecryptedPrivateKey);
 //    }
 }

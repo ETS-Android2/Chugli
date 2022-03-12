@@ -5,12 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 
 import com.example.gupshup.R;
 import com.example.gupshup.databinding.ActivityPhoneNumberBinding;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class PhoneNumberActivity extends AppCompatActivity {
@@ -25,6 +28,9 @@ public class PhoneNumberActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         auth = FirebaseAuth.getInstance();
+
+
+
 
         if(auth.getCurrentUser() != null) {
             Intent intent = new Intent(PhoneNumberActivity.this, MainActivity.class);
@@ -50,4 +56,6 @@ public class PhoneNumberActivity extends AppCompatActivity {
         });
 
     }
+
+
 }

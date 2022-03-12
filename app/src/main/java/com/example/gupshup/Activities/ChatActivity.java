@@ -6,12 +6,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 
@@ -32,15 +36,27 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+
+import android.util.Base64;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -59,7 +75,8 @@ public class ChatActivity extends AppCompatActivity {
     String receiverUid;
 
     PrivateKey privateKey;
-    PublicKey publicKey;
+    PublicKey receiverPublicKey;
+    String strReceiverPublicKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +97,31 @@ public class ChatActivity extends AppCompatActivity {
         messages = new ArrayList<>();
 
 
-        String name = getIntent().getStringExtra("name");
-        String profile = getIntent().getStringExtra("image");
+        String name = getIntent().getStringExtra("receiverName");
+        String profile = getIntent().getStringExtra("receiverImage");
+        strReceiverPublicKey = getIntent().getStringExtra("receiverPublicKey");
+        try {
+            receiverPublicKey = convertPublicStringToKey(strReceiverPublicKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("Conversion Error", "Couldn't convert str to PublicKey");
+        }
+
+
+        String SHARED_PREFS = "sharedPrefs";
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String strPrivateKey = sharedPreferences.getString("strPKey", "");
+        if(strPrivateKey!="") {
+            try {
+                Log.i("Conversion Private", "called");
+                privateKey = convertPrivateStringToKey(strPrivateKey);
+                Log.i("Conversion Private", "done");
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.i("Conversion Error", "Couldn't convert str to PrivateKey");
+            }
+        }
+
 
         binding.name.setText(name);//setting name in toolbar
         Glide.with(ChatActivity.this).load(profile)//setting image in toolbar
@@ -95,16 +135,16 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        receiverUid = getIntent().getStringExtra("uid");
+        receiverUid = getIntent().getStringExtra("receiverUid");
         senderUid = FirebaseAuth.getInstance().getUid();
 
         database.getReference().child("presence").child(receiverUid).addValueEventListener(new ValueEventListener() {  //checking if clicked user is online or offline, here receiverUid is the id of the user that is clicked in the user list in MainActivity
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()) {
+                if (snapshot.exists()) {
                     String status = snapshot.getValue(String.class);//get the value in String type
-                    if(!status.isEmpty()) {
-                        if(status.equals("Offline")) {
+                    if (!status.isEmpty()) {
+                        if (status.equals("Offline")) {
                             binding.status.setVisibility(View.GONE);
                         } else {
                             binding.status.setText(status);
@@ -132,7 +172,6 @@ public class ChatActivity extends AppCompatActivity {
 //        binding.recyclerView.scrollToPosition(messages.size()-1);
 
 
-
         database.getReference().child("chats")
                 .child(senderRoom)
                 .child("messages")
@@ -143,8 +182,16 @@ public class ChatActivity extends AppCompatActivity {
                         binding.recyclerView.scrollToPosition(messages.size());
 
                         messages.clear();
-                        for(DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                             Message message = snapshot1.getValue(Message.class);
+
+                            if (!FirebaseAuth.getInstance().getUid().equals(message.getSenderId())) {
+                                //message is received
+                                Log.i("Decryption", "called");
+                                Log.i("getMessage", message.getMessage());
+                                String decryptedMessageTxt = decryptString(message.getMessage());
+                                message.setMessage(decryptedMessageTxt);
+                            }
                             message.setMessageId(snapshot1.getKey());//message id is set to name of child of messages
                             messages.add(message);
                         }
@@ -162,11 +209,13 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String messageTxt = binding.messageBox.getText().toString();
+                String encryptedMessageTxt = encryptString(messageTxt);
+//                String decryptedMessageTxt = decryptString(encryptedMessageTxt);
+                Log.i("encryptedMessageTxt", encryptedMessageTxt);
 
-                encryptRSA(messageTxt);
 
                 Date date = new Date();
-                Message message = new Message(messageTxt, senderUid, date.getTime());
+                Message message = new Message(encryptedMessageTxt, senderUid, date.getTime());
                 binding.messageBox.setText("");
 
                 //for making the same name of child of messages in both sender room and receiver room nodes. So that we can track which message was touched and hold for long.
@@ -213,7 +262,6 @@ public class ChatActivity extends AppCompatActivity {
         });
 
 
-
         //Typing user logic
 
         final Handler handler = new Handler();  //this will help us in changing the text from typing... to online or offline once the current user has stopped typing
@@ -232,7 +280,7 @@ public class ChatActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 database.getReference().child("presence").child(senderUid).setValue("typing...");  //set the presence of current user as typing...
                 handler.removeCallbacksAndMessages(null);
-                handler.postDelayed(userStoppedTyping,1000);//timing to show online again after typing... is 1000 milliseconds
+                handler.postDelayed(userStoppedTyping, 1000);//timing to show online again after typing... is 1000 milliseconds
             }
 
             Runnable userStoppedTyping = new Runnable() {
@@ -251,25 +299,96 @@ public class ChatActivity extends AppCompatActivity {
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);//default actionbar of android
     }
 
-    public void encryptRSA(String msg){
-        try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(1024);
-            KeyPair pair = generator.generateKeyPair();
-            privateKey=pair.getPrivate();
-            publicKey= pair.getPublic();
+//    public String encrypt(String message) throws Exception{
+//        byte[] messageToBytes = message.getBytes();
+//        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+//        cipher.init(Cipher.ENCRYPT_MODE,publicKey);
+//        byte[] encryptedBytes = cipher.doFinal(messageToBytes);
+//        return encode(encryptedBytes);
+//    }
+//
+//    private String encode(byte[] data){
+//        return Base64.encodeToString(data, 2);
+//    }
+//    private byte[] decode(String data){
+//
+//        return Base64.decode(data, 2);
+//    }
+
+    public PublicKey convertPublicStringToKey(String strPublicKeyLocal) throws Exception {
+        Log.i("PublicString to key", ": inside");
+        try {/*w w w.  j  a  va 2s. c om*/
+            byte[] buffer = Base64.decode(strPublicKeyLocal, Base64.DEFAULT);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(buffer);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+            Log.i("PublicString Completed", ": inside");
+
+            return (RSAPublicKey) keyFactory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
+            throw new Exception("");
+        } catch (InvalidKeySpecException e) {
+            throw new Exception("?");
+        } catch (NullPointerException e) {
+            throw new Exception("?");
+        }
+    }
+
+    public PrivateKey convertPrivateStringToKey(String strPrivateKeyLocal) throws Exception {
+        Log.i("PrivateString to key", ": inside");
+        try {/*w w w.  j  a  va 2s. c om*/
+            byte[] buffer = Base64.decode(strPrivateKeyLocal, Base64.DEFAULT);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buffer);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+            Log.i("PrivateString Completed", ": inside");
+
+            return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
+        } catch (NoSuchAlgorithmException e) {
+            throw new Exception("");
+        } catch (InvalidKeySpecException e) {
+            throw new Exception("?");
+        } catch (NullPointerException e) {
+            throw new Exception("?");
+        }
+    }
+
+    public String encryptString(String value) {
+        byte[] encodedBytes = null;
+        try {
+            //Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "AndroidOpenSSL");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, receiverPublicKey);
+            encodedBytes = cipher.doFinal(value.getBytes());
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return Base64.encodeToString(encodedBytes, Base64.DEFAULT);
+    }
+
+    public String decryptString(String value) {
+        byte[] decodedBytes = null;
+        try {
+            //Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "AndroidOpenSSL");
+            Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            c.init(Cipher.DECRYPT_MODE, privateKey);
+            decodedBytes = c.doFinal(Base64.decode(value, Base64.DEFAULT));
+            Log.i("Decryption", "completed");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new String(decodedBytes);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == 25) {
-            if(data != null) {
-                if(data.getData() != null) {
+        if (requestCode == 25) {
+            if (data != null) {
+                if (data.getData() != null) {
                     Uri selectedImage = data.getData();
                     Calendar calendar = Calendar.getInstance();
                     StorageReference reference = storage.getReference().child("chats").child(calendar.getTimeInMillis() + "");
@@ -278,7 +397,7 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                             dialog.dismiss();
-                            if(task.isSuccessful()) {
+                            if (task.isSuccessful()) {
                                 reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
                                     public void onSuccess(Uri uri) {

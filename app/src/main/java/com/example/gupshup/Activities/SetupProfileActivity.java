@@ -88,9 +88,10 @@ public class SetupProfileActivity extends AppCompatActivity {
                     }
                     else{
                         isKeyNeeded=0;
-                        keyGenerated=1;
                         strPrivateKey=userGlobal.getPrivateKey();
+                        Log.i("SPK", strPrivateKey);
                         strPublicKey=userGlobal.getPublicKey();
+                        keyGenerated=1;
                     }
                 }
                 else{
@@ -141,24 +142,24 @@ public class SetupProfileActivity extends AppCompatActivity {
                     convertKeyToString(privateKey, publicKey);
                 }
                 else{
-                    try {
-                        Log.i("try private", ": inside");
-                        PrivateKey localPrivateKey = convertPrivateStringToKey(strPrivateKey);
-                        String strLocalPrivateKey = Base64.encodeToString(localPrivateKey.getEncoded(), 2);
-                        Log.i("Local Private Key", strLocalPrivateKey);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.i("catch private", ": inside");
-                    }
-                    try {
-                        Log.i("try public", ": inside");
-                        PublicKey localPublicKey = convertPublicStringToKey(strPublicKey);
-                        String strLocalPublicKey = Base64.encodeToString(localPublicKey.getEncoded(), 2);
-                        Log.i("Local Public Key", strLocalPublicKey);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.i("catch public", ": inside");
-                    }
+//                    try {
+//                        Log.i("try private", ": inside");
+//                        PrivateKey localPrivateKey = convertPrivateStringToKey(strPrivateKey);
+//                        String strLocalPrivateKey = Base64.encodeToString(localPrivateKey.getEncoded(), 2);
+//                        Log.i("Local Private Key", strLocalPrivateKey);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        Log.i("catch private", ": inside");
+//                    }
+//                    try {
+//                        Log.i("try public", ": inside");
+//                        PublicKey localPublicKey = convertPublicStringToKey(strPublicKey);
+//                        String strLocalPublicKey = Base64.encodeToString(localPublicKey.getEncoded(), 2);
+//                        Log.i("Local Public Key", strLocalPublicKey);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        Log.i("catch public", ": inside");
+//                    }
                 }
 
                 Log.i("After gen in user!=null", ": inside");
@@ -185,9 +186,16 @@ public class SetupProfileActivity extends AppCompatActivity {
                                         Log.i("Public Key 2", strPublicKey);
                                         Log.i("keyGenerated 2", keyGenerated + "");
 
-                                        String emptyPrivateKey = "";
+                                        String tempPrivateKey="";
 
-                                        User userLocal1 = new User(uid, name, phone, imageUrl, emptyPrivateKey, strPublicKey, keyGenerated);  //creating object of User
+                                        if(isUserNew==1) {
+                                            tempPrivateKey = "";
+                                        }
+                                        else{
+                                            tempPrivateKey = userGlobal.getPrivateKey();
+                                        }
+
+                                        User userLocal1 = new User(uid, name, phone, imageUrl, tempPrivateKey, strPublicKey, keyGenerated);  //creating object of User
 
                                         uploadUserDetails(userLocal1);
                                     }
@@ -202,9 +210,15 @@ public class SetupProfileActivity extends AppCompatActivity {
                     Log.i("Public Key 3", strPublicKey);
                     Log.i("keyGenerated 3", keyGenerated + "");
 
-                    String emptyPrivateKey = "";
+                    String tempPrivateKey="";
+                    if(isUserNew==1) {
+                        tempPrivateKey = "";
+                    }
+                    else{
+                        tempPrivateKey = userGlobal.getPrivateKey();
+                    }
 
-                    User userLocal2 = new User(userId, name, phone, "No Image", emptyPrivateKey, strPublicKey, keyGenerated);
+                    User userLocal2 = new User(userId, name, phone, "No Image", tempPrivateKey, strPublicKey, keyGenerated);
                     uploadUserDetails(userLocal2);
 
 
@@ -227,7 +241,9 @@ public class SetupProfileActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         dialog.dismiss();
                         if(isUserNew==0) {
-                            Intent intent = new Intent(SetupProfileActivity.this, MainActivity.class);
+                            Intent intent = new Intent(SetupProfileActivity.this, PrivateKeyDecryptionActivity.class);
+                            intent.putExtra("strPrivateKey", strPrivateKey);
+                            intent.putExtra("user", user);
                             startActivity(intent);
                             finish();
                         }

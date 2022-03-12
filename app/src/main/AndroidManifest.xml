@@ -11,6 +11,9 @@
         android:theme="@style/Theme.GupShup"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Activities.PrivateKeyDecryptionActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activities.PrivateKeyEncryptionActivity"
             android:exported="false" />
         <activity
