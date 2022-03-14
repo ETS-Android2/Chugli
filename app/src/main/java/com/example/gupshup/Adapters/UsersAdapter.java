@@ -2,6 +2,7 @@ package com.example.gupshup.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +51,40 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UsersViewHol
 
         String senderRoom = senderId + user.getUid();
 
+        FirebaseDatabase.getInstance().getReference()
+                                    .child("presence")
+                                    .child(user.getUid())
+                                    .addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if(snapshot.exists()) {
+                                                String status = snapshot.getValue(String.class);//get the value in String type
+                                                if (!status.isEmpty()) {
+                                                    if (status.equals("Online")) {
+                                                        holder.binding.lastMsg.setText("Online");
+                                                        holder.binding.lastMsg.setTextColor(Color.parseColor("#27c250"));
+                                                    }
+                                                    else if(status.equals("typing...")){
+                                                        holder.binding.lastMsg.setText("typing...");
+                                                        holder.binding.lastMsg.setTextColor(Color.parseColor("#4333d4"));
+                                                    }
+                                                    else{
+                                                        holder.binding.lastMsg.setText("Tap to chat");
+                                                        holder.binding.lastMsg.setTextColor(Color.parseColor("#eb1e3a"));
+                                                    }
+                                                }
+                                            } else {
+                                                holder.binding.lastMsg.setText("Tap to chat");
+
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+
 //        FirebaseDatabase.getInstance().getReference()
 //                .child("chats")
 //                .child(senderRoom)
@@ -59,38 +94,6 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UsersViewHol
 //                        if(snapshot.exists()) {
 //                            String lastMsg = snapshot.child("lastMsg").getValue(String.class);
 //                            long time = snapshot.child("lastMsgTime").getValue(Long.class);
-//
-//
-//                            FirebaseDatabase.getInstance().getReference()
-//                                    .child("chats")
-//                                    .child(senderRoom).child("messages").
-//                                    .addValueEventListener(new ValueEventListener() {
-//                                        @Override
-//                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                                            if(snapshot.exists()) {
-//                                                String lastMsg = snapshot.child("lastMsg").getValue(String.class);
-//                                                long time = snapshot.child("lastMsgTime").getValue(Long.class);
-//                                                SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
-//                                                holder.binding.msgTime.setText(dateFormat.format(new Date(time)));
-//                                                holder.binding.lastMsg.setText(lastMsg);
-//                                            } else {
-//                                                holder.binding.lastMsg.setText("Tap to chat");
-//                                            }
-//                                        }
-//
-//                                        @Override
-//                                        public void onCancelled(@NonNull DatabaseError error) {
-//
-//                                        }
-//                                    });
-//
-//
-//
-//
-//
-//
-//
-//
 //                            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
 //                            holder.binding.msgTime.setText(dateFormat.format(new Date(time)));
 //                            holder.binding.lastMsg.setText(lastMsg);
