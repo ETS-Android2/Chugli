@@ -3,6 +3,8 @@ package com.example.gupshup.Adapters;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.gupshup.Models.Message;
 import com.example.gupshup.R;
+import com.example.gupshup.Tools.DBHandler;
 import com.example.gupshup.databinding.DeleteDialogBinding;
 import com.example.gupshup.databinding.ItemReceiveBinding;
 import com.example.gupshup.databinding.ItemSentBinding;
@@ -24,7 +27,10 @@ import com.github.pgreze.reactions.ReactionsConfigBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.security.PrivateKey;
 import java.util.ArrayList;
+
+import javax.crypto.Cipher;
 
 public class MessagesAdapter extends RecyclerView.Adapter {
 
@@ -37,12 +43,19 @@ public class MessagesAdapter extends RecyclerView.Adapter {
     String senderRoom;
     String receiverRoom;
     int i=0;
+    PrivateKey privateKey;
+    DBHandler dbHandler;
+    String strAESKey;
 
-    public MessagesAdapter(Context context, ArrayList<Message> messages, String senderRoom, String receiverRoom) {
+    public MessagesAdapter(Context context, ArrayList<Message> messages, String senderRoom, String receiverRoom, PrivateKey privateKey, String strAESKey) {
         this.context = context;
         this.messages = messages;
         this.senderRoom = senderRoom;
         this.receiverRoom = receiverRoom;
+        this.privateKey = privateKey;
+        this.strAESKey = strAESKey;
+        dbHandler = new DBHandler(context, strAESKey);
+        dbHandler.openDatabase();
     }
 
     @NonNull
@@ -139,7 +152,17 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                         .into(viewHolder.binding.image);
             }
 
-            viewHolder.binding.message.setText(message.getMessage());
+            String decryptedMessage = "";
+            Log.i("getMessageId", message.getMessageId());
+            decryptedMessage = dbHandler.getDecrypted(message.getMessageId());
+            if(decryptedMessage!="") {
+                viewHolder.binding.message.setText(decryptedMessage);
+            }
+            else{
+                viewHolder.binding.message.setText(message.getMessage());
+
+            }
+
             if(message.getFeeling() >= 0) {  //updating message class with our feeling for senderRoom
                 viewHolder.binding.feeling.setImageResource(reactions[message.getFeeling()]);//for setting feeling image of sender
                 viewHolder.binding.feeling.setVisibility(View.VISIBLE);
@@ -229,7 +252,15 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                         .placeholder(R.drawable.placeholder)
                         .into(viewHolder.binding.image);
             }
-            viewHolder.binding.message.setText(message.getMessage());
+
+
+            //message is received
+            Log.i("Decryption", "called");
+            Log.i("getMessage", message.getMessage());
+            String decryptedMessageTxt = decryptString(message.getMessage());
+
+
+            viewHolder.binding.message.setText(decryptedMessageTxt);
 
             if(message.getFeeling() >= 0) {//updating message class with our feeling for receiverRoom
                 //message.setFeeling(reactions[message.getFeeling()]);
@@ -310,6 +341,21 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                 }
             });
         }
+    }
+
+    public String decryptString(String value) {
+        byte[] decodedBytes = null;
+        try {
+            //Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "AndroidOpenSSL");
+            Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            c.init(Cipher.DECRYPT_MODE, privateKey);
+            decodedBytes = c.doFinal(Base64.decode(value, Base64.DEFAULT));
+            Log.i("Decryption", "completed");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new String(decodedBytes);
     }
 
     @Override

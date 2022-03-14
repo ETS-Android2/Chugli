@@ -2,8 +2,10 @@ package com.example.gupshup.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -16,12 +18,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.gupshup.Adapters.TopStatusAdapter;
 import com.example.gupshup.Adapters.UsersAdapter;
+import com.example.gupshup.Models.MessageBackup;
+import com.example.gupshup.Models.MessageBackupArray;
 import com.example.gupshup.Models.Status;
 import com.example.gupshup.Models.User;
 import com.example.gupshup.Models.UserStatus;
 import com.example.gupshup.R;
+import com.example.gupshup.Tools.DBHandler;
 import com.example.gupshup.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -30,10 +36,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,9 +57,14 @@ public class MainActivity extends AppCompatActivity {
     UsersAdapter usersAdapter;
     TopStatusAdapter statusAdapter;
     ArrayList<UserStatus> userStatuses;
+    ArrayList<MessageBackup> messageBackupArraylist;
     ProgressDialog dialog;
-
+    DBHandler dbHandler;
+    String uid = FirebaseAuth.getInstance().getUid();
+    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     User user;
+    int flag = 0;
+    String SHARED_PREFS = "sharedPrefs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +72,10 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Intent intent = getIntent();
+        if (intent.hasExtra("ActivityName")) {
+            flag = 1;
+        }
         dialog = new ProgressDialog(this);
         dialog.setMessage("Uploading Image...");
         dialog.setCancelable(false);
@@ -63,6 +83,39 @@ public class MainActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         users = new ArrayList<>();
         userStatuses = new ArrayList<>();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String strAESKey = sharedPreferences.getString("strAESKey", "");
+
+        if (flag == 0) {
+            dbHandler = new DBHandler(this, strAESKey);
+            messageBackupArraylist = dbHandler.getAESEncryptedDecryptedForBackup();
+            Log.i("arr len MAct", messageBackupArraylist.size() + "");
+            MessageBackupArray messageBackupArray = new MessageBackupArray(messageBackupArraylist);
+
+            firestore.collection("backups").document(uid)
+                    .set(messageBackupArray, SetOptions.merge())
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.i("Firestore Upload", "Successful");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w("Firestore Upload", "Error adding document", e);
+                        }
+                    });
+        }
+
+
+//        dbHandler = new DBHandler(this);
+//        try {
+//            dbHandler.createDatabase();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         database.getReference().child("users").child(FirebaseAuth.getInstance().getUid())
                 .addValueEventListener(new ValueEventListener() {
@@ -95,8 +148,6 @@ public class MainActivity extends AppCompatActivity {
 //        binding.statusList.showShimmerAdapter();
 
 
-
-
         //Article for below given method :
         //When it comes to reading data from Firebase Realtime Database, there are two options available. The first one is to read the data using a persistent listener, meaning that we’ll always be in sync with the Firebase servers, or we can read the data only once. The first option is very helpful when we need to listen for changes in real-time. We can achieve this using Query’s addValueEventListener() method. This method adds a listener for changes in the data at a particular path in the database. Each time the data changes, the listener will be invoked with an immutable snapshot of the data. However, there are cases in which we need to read the data from the database only once.
         //Even from the beginning in 2015, it was added in the Firebase Realtime Database Android SDK a method called addListenerForSingleValueEvent(). This method adds a listener for a single change, meaning that we can read the data at a particular path exactly once. This method remains part of the Firebase Realtime Database Android SDK ever since.
@@ -105,9 +156,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {  //will be called if there is any change in data of "users" and will take a snapshot
                 users.clear();  //clears all the previous users from the users arrayList
-                for(DataSnapshot snapshot1 : snapshot.getChildren()) {  //snapshot.getChildren() will give us the children of "users" child because we took snapshot of "users" which has many registered users in it.
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {  //snapshot.getChildren() will give us the children of "users" child because we took snapshot of "users" which has many registered users in it.
                     User user = snapshot1.getValue(User.class);  //will get a User from snapshot1 and make an object of it of type User class.
-                    if(!user.getUid().equals(FirebaseAuth.getInstance().getUid()))//do not load the current logged in user in users list
+                    if (!user.getUid().equals(FirebaseAuth.getInstance().getUid()))//do not load the current logged in user in users list
                         users.add(user);
                 }
 //                binding.recyclerView.hideShimmerAdapter();//hiding shimmerAdapter to show our real adapter of users list
@@ -121,17 +172,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
-
-
-
         database.getReference().child("stories").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()) {
+                if (snapshot.exists()) {
                     userStatuses.clear();  //this will clear previous statuses and below function will again refresh the statuses set by the user
-                    for(DataSnapshot storySnapshot : snapshot.getChildren()) {
+                    for (DataSnapshot storySnapshot : snapshot.getChildren()) {
                         UserStatus userStatus = new UserStatus();
                         userStatus.setName(storySnapshot.child("name").getValue(String.class));
                         userStatus.setProfileImage(storySnapshot.child("profileImage").getValue(String.class));
@@ -139,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
 
                         ArrayList<Status> statuses = new ArrayList<>();
 
-                        for(DataSnapshot statusSnapshot : storySnapshot.child("statuses").getChildren()) {
+                        for (DataSnapshot statusSnapshot : storySnapshot.child("statuses").getChildren()) {
                             Status sampleStatus = statusSnapshot.getValue(Status.class);
                             statuses.add(sampleStatus);
                         }
@@ -180,8 +226,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(data != null) {
-            if(data.getData() != null) {
+        if (data != null) {
+            if (data.getData() != null) {
                 dialog.show();
                 FirebaseStorage storage = FirebaseStorage.getInstance();
                 Date date = new Date();
@@ -190,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
                 reference.putFile(data.getData()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if(task.isSuccessful()) {
+                        if (task.isSuccessful()) {
                             reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
@@ -226,6 +272,36 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String strAESKey = sharedPreferences.getString("strAESKey", "");
+
+
+        dbHandler = new DBHandler(this, strAESKey);
+        messageBackupArraylist = dbHandler.getAESEncryptedDecryptedForBackup();
+        Log.i("arr len MAct", messageBackupArraylist.size() + "");
+        MessageBackupArray messageBackupArray = new MessageBackupArray(messageBackupArraylist);
+
+        firestore.collection("backups").document(uid)
+                .set(messageBackupArray, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.i("Firestore Upload", "Successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("Firestore Upload", "Error adding document", e);
+                    }
+                });
+
     }
 
     @Override

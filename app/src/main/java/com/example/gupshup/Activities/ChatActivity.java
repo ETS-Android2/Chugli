@@ -22,9 +22,14 @@ import android.view.View;
 import com.bumptech.glide.Glide;
 import com.example.gupshup.Adapters.MessagesAdapter;
 import com.example.gupshup.Models.Message;
+import com.example.gupshup.Models.MessageBackup;
+import com.example.gupshup.Models.MessageBackupArray;
+import com.example.gupshup.Models.User;
 import com.example.gupshup.R;
+import com.example.gupshup.Tools.DBHandler;
 import com.example.gupshup.databinding.ActivityChatBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,6 +37,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -77,6 +84,11 @@ public class ChatActivity extends AppCompatActivity {
     PrivateKey privateKey;
     PublicKey receiverPublicKey;
     String strReceiverPublicKey;
+    DBHandler dbHandler;
+    String SHARED_PREFS = "sharedPrefs";
+    ArrayList<MessageBackup> messageBackupArraylist;
+    String uid = FirebaseAuth.getInstance().getUid();
+    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +101,13 @@ public class ChatActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         storage = FirebaseStorage.getInstance();
+
+        String SHARED_PREFS = "sharedPrefs";
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String strPrivateKey = sharedPreferences.getString("strPKey", "");
+        String strAESKey = sharedPreferences.getString("strAESKey", "");
+
+        dbHandler = new DBHandler(this, strAESKey);
 
         dialog = new ProgressDialog(this);
         dialog.setMessage("Uploading image...");
@@ -108,9 +127,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
 
-        String SHARED_PREFS = "sharedPrefs";
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        String strPrivateKey = sharedPreferences.getString("strPKey", "");
+
         if(strPrivateKey!="") {
             try {
                 Log.i("Conversion Private", "called");
@@ -163,8 +180,10 @@ public class ChatActivity extends AppCompatActivity {
         senderRoom = senderUid + receiverUid;
         receiverRoom = receiverUid + senderUid;
 
-        adapter = new MessagesAdapter(this, messages, senderRoom, receiverRoom);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new MessagesAdapter(this, messages, senderRoom, receiverRoom, privateKey, strAESKey);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+//        linearLayoutManager.setStackFromEnd(true);
+        binding.recyclerView.setLayoutManager(linearLayoutManager);
         binding.recyclerView.setAdapter(adapter);
 
 //
@@ -179,24 +198,30 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                        Log.i("Scroll 1", "called");
+
                         binding.recyclerView.scrollToPosition(messages.size());
 
                         messages.clear();
                         for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                             Message message = snapshot1.getValue(Message.class);
 
-                            if (!FirebaseAuth.getInstance().getUid().equals(message.getSenderId())) {
-                                //message is received
-                                Log.i("Decryption", "called");
-                                Log.i("getMessage", message.getMessage());
-                                String decryptedMessageTxt = decryptString(message.getMessage());
-                                message.setMessage(decryptedMessageTxt);
-                            }
+//                            if (!FirebaseAuth.getInstance().getUid().equals(message.getSenderId())) {
+//                                //message is received
+//                                Log.i("Decryption", "called");
+//                                Log.i("getMessage", message.getMessage());
+//                                String decryptedMessageTxt = decryptString(message.getMessage());
+//                                message.setMessage(decryptedMessageTxt);
+//                            }
                             message.setMessageId(snapshot1.getKey());//message id is set to name of child of messages
                             messages.add(message);
                         }
 
                         adapter.notifyDataSetChanged();
+//                        Log.i("Scroll", "called");
+//                        binding.recyclerView.scrollToPosition(messages.size());
+//                        Log.i("Scroll", "completed");
+
                     }
 
                     @Override
@@ -209,6 +234,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String messageTxt = binding.messageBox.getText().toString();
+
                 String encryptedMessageTxt = encryptString(messageTxt);
 //                String decryptedMessageTxt = decryptString(encryptedMessageTxt);
                 Log.i("encryptedMessageTxt", encryptedMessageTxt);
@@ -220,6 +246,12 @@ public class ChatActivity extends AppCompatActivity {
 
                 //for making the same name of child of messages in both sender room and receiver room nodes. So that we can track which message was touched and hold for long.
                 String randomKey = database.getReference().push().getKey();//this push() method generates a unique key every time a new child is added to the specific firebase reference and we have got its key
+
+                Log.i("insertMessage", "start");
+                dbHandler.insertMessage(randomKey, messageTxt);
+                Log.i("insertMessage", "completed");
+
+
 
                 HashMap<String, Object> lastMsgObj = new HashMap<>();
                 lastMsgObj.put("lastMsg", message.getMessage()); //getting last message
@@ -297,6 +329,36 @@ public class ChatActivity extends AppCompatActivity {
 //        getSupportActionBar().setTitle(name);//default actionbar of android
 //
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);//default actionbar of android
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String strAESKey = sharedPreferences.getString("strAESKey", "");
+
+
+        dbHandler = new DBHandler(this, strAESKey);
+        messageBackupArraylist = dbHandler.getAESEncryptedDecryptedForBackup();
+        Log.i("arr len MAct", messageBackupArraylist.size() + "");
+        MessageBackupArray messageBackupArray = new MessageBackupArray(messageBackupArraylist);
+
+        firestore.collection("backups").document(uid)
+                .set(messageBackupArray, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.i("Firestore Upload", "Successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("Firestore Upload", "Error adding document", e);
+                    }
+                });
+
     }
 
 //    public String encrypt(String message) throws Exception{

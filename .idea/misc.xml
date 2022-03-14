@@ -11,7 +11,10 @@
         <entry key="..\:/Android_Studio_Projects/GupShup/app/src/main/res/layout/activity_private_key_decryption.xml" value="0.176" />
         <entry key="..\:/Android_Studio_Projects/GupShup/app/src/main/res/layout/activity_private_key_encryption.xml" value="0.176" />
         <entry key="..\:/Android_Studio_Projects/GupShup/app/src/main/res/layout/activity_setup_profile.xml" value="0.13645833333333332" />
-        <entry key="..\:/Android_Studio_Projects/GupShup/app/src/main/res/layout/item_sent.xml" value="0.536" />
+        <entry key="..\:/Android_Studio_Projects/GupShup/app/src/main/res/layout/delete_dialog.xml" value="0.175" />
+        <entry key="..\:/Android_Studio_Projects/GupShup/app/src/main/res/layout/item_receive.xml" value="0.17291666666666666" />
+        <entry key="..\:/Android_Studio_Projects/GupShup/app/src/main/res/layout/item_sent.xml" value="0.176" />
+        <entry key="..\:/Android_Studio_Projects/GupShup/app/src/main/res/layout/row_conversation.xml" value="0.264" />
       </map>
     </option>
   </component>

@@ -12,16 +12,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.gupshup.Models.MessageBackup;
 import com.example.gupshup.Models.User;
 import com.example.gupshup.R;
+import com.example.gupshup.Tools.DBHandler;
 import com.example.gupshup.databinding.ActivityPrivateKeyEncryptionBinding;
 import com.example.gupshup.databinding.ActivitySetupProfileBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.scottyab.aescrypt.AESCrypt;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 
 public class PrivateKeyEncryptionActivity extends AppCompatActivity {
 
@@ -34,6 +39,7 @@ public class PrivateKeyEncryptionActivity extends AppCompatActivity {
     FirebaseAuth auth;
     ProgressDialog dialog;
     String regex;
+    DBHandler dbHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +103,17 @@ public class PrivateKeyEncryptionActivity extends AppCompatActivity {
                 else{
                     try {
                         dialog.show();
+
+                        String strAESKeyLocal = strAESKey;
+                        dbHandler = new DBHandler(PrivateKeyEncryptionActivity.this, strAESKeyLocal);
+                        try {
+                            dbHandler.createDatabase();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        dbHandler.openDatabase();
+                        dbHandler.createTable();
+
                         encrypt();
                     } catch (GeneralSecurityException e) {
                         e.printStackTrace();
@@ -127,6 +144,7 @@ public class PrivateKeyEncryptionActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         dialog.dismiss();
                         Intent intent = new Intent(PrivateKeyEncryptionActivity.this, MainActivity.class);
+                        intent.putExtra("ActivityName", "PKEAct");
                         startActivity(intent);
                         finish();
                     }

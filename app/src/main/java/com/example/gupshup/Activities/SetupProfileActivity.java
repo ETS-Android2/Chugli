@@ -13,8 +13,11 @@ import android.util.Log;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
+import com.example.gupshup.Models.MessageBackup;
+import com.example.gupshup.Models.MessageBackupArray;
 import com.example.gupshup.Models.User;
 import com.example.gupshup.R;
+import com.example.gupshup.Tools.DBHandler;
 import com.example.gupshup.databinding.ActivitySetupProfileBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -24,10 +27,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -39,6 +45,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
+
 import android.util.Base64;
 
 public class SetupProfileActivity extends AppCompatActivity {
@@ -60,11 +68,14 @@ public class SetupProfileActivity extends AppCompatActivity {
     int isKeyNeeded = 0;
     User userGlobal;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySetupProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+
 
         dialog = new ProgressDialog(this);
         dialog.setMessage("Updating profile...");
