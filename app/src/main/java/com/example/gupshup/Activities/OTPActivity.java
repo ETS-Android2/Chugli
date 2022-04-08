@@ -112,7 +112,6 @@ public class OTPActivity extends AppCompatActivity {
                             startActivity(intent);
                             finishAffinity();
 
-
                         } else { //failed login if otp entered is incorrect
                             Toast.makeText(OTPActivity.this, "Failed.", Toast.LENGTH_SHORT).show();
                         }
