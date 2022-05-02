@@ -361,7 +361,36 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-//    public String encrypt(String message) throws Exception{
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String strAESKey = sharedPreferences.getString("strAESKey", "");
+
+        dbHandler = new DBHandler(this, strAESKey);
+        messageBackupArraylist = dbHandler.getAESEncryptedDecryptedForBackup();
+        Log.i("arr len MAct", messageBackupArraylist.size() + "");
+        MessageBackupArray messageBackupArray = new MessageBackupArray(messageBackupArraylist);
+
+        firestore.collection("backups").document(uid)
+                .set(messageBackupArray, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.i("Firestore Upload", "Successful");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("Firestore Upload", "Error adding document", e);
+                    }
+                });
+
+    }
+
+    //    public String encrypt(String message) throws Exception{
 //        byte[] messageToBytes = message.getBytes();
 //        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 //        cipher.init(Cipher.ENCRYPT_MODE,publicKey);
