@@ -6,6 +6,8 @@
 - It is a free online chat android application, enabling user to create a free user account and then log in using the credentials. <br/>
 - After loggin in user can chat with other users who have successfully registered in the application. <br/>
 - For authentication of user i have used PhoneAuthorization by Firebase. <br/>
+- This has end-to-end encrypted chatting. <br/>
+- I have also provided Automatic end-to-end encryption of chat backup.
 - User has a special feature to tag a chat with emojis for which i have used facebook feelings library.<br/>
 - This app allows users to set their stories just like they do in Instagram.
 - There is an option for group chat also.
